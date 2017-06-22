@@ -1,5 +1,8 @@
 <?php
 
+
+//Includes ** //
+include 'products.php';
 /**
  * Path to Autoloader here, Usually in main directory. 
  */
@@ -13,6 +16,9 @@ require 'php-autoloader.php';
  */
 $config = require 'configuration.php';
 
+
+
+
 /**
  * The namespaces provided by the SDK.
  */
@@ -22,6 +28,29 @@ use \DTS\eBaySDK\Trading\Services;
 use \DTS\eBaySDK\Trading\Types;
 use \DTS\eBaySDK\Trading\Enums;
 
+
+foreach($products_array as $imported) {
+	$title = $imported['title'];
+	$SKU = $imported['SKU'];
+	$description = $imported['description'];
+	$PictureURL1 = $imported['PictureURL1'];
+	$PictureURL2 = $imported['PictureURL2'];
+	$PictureURL3 = $imported['PictureURL3'];
+	$Category = $imported['Category'];
+	$Brand = $imported['Brand'];
+	$MPN = $imported['MPN'];
+	$EAN = $imported['EAN'];
+	$Condition = $imported['Condition'];
+	$Quantity = $imported['Quantity'];
+	$Price = $imported['Price'];
+	$Shipping1 = $imported['Shipping1'];
+	$Shipping2 = $imported['Shipping2'];
+	
+	settype($title, 'string');
+	settype($Condition, 'Integer');
+	settype($Quantity, 'Integer');
+	settype($Brand, 'string');
+	settype($Price, 'double');
 /**
  * Specify the numerical site id that we want the listing to appear on. EG, GB = UK Website US = United States Website
  *
@@ -31,6 +60,8 @@ use \DTS\eBaySDK\Trading\Enums;
  * information.
  *
  */
+ 
+ 
 $siteId = Constants\SiteIds::GB;
 
 /**
@@ -63,7 +94,7 @@ $item = new Types\ItemType();
  * We want a multiple quantity fixed price listing.
  */
 $item->ListingType = Enums\ListingTypeCodeType::C_FIXED_PRICE_ITEM;
-$item->Quantity = 1;
+$item->Quantity = $Quantity;
 
 /**
  * Let the listing be automatically renewed every 30 days until cancelled.
@@ -75,7 +106,7 @@ $item->ListingDuration = Enums\ListingDurationCodeType::C_GTC;
  * Note that we don't have to specify a currency as eBay will use the site id
  * that we provided earlier to determine that it will be United States Dollars (USD).
  */
-$item->StartPrice = new Types\AmountType(['value' => 19.99]);
+$item->StartPrice = new Types\AmountType(['value' => $Price]);
 
 /**
  * Allow buyers to submit a best offer.
@@ -93,16 +124,13 @@ $item->ListingDetails->MinimumBestOfferPrice = new Types\AmountType(['value' => 
  * Provide a title and description and other information such as the item's location.
  * Note that any HTML in the title or description must be converted to HTML entities.
  */
-$item->Title = 'Multi Piece Mini Precision Screwdriver Set - Test Photo';
-$item->Description = '<h1>Syte Tools Direct</h1><p>A precision screwdriver set manufactured with steel blades which have precision ground tips and metallic handles with a rotating tip. The screwdrivers are manufactured with selected steel handles and chemically hardened, high carbon steel blades. The set is supplied in a rigid, hinged case.
-
-Available in either a 6 piece set or a 11 piece set.
-
-These precision screw driver sets are perfect for carrying out repairs on very small products such as jewellery, glasses and mobile phones.</p>';
-$item->SKU = 'ABC-001';
+$item->Title = $title;
+$item->Description = $description;
+$item->SKU = $SKU;
 $item->Country = 'GB';
 $item->Location = 'Halifax';
 $item->PostalCode = 'HX62UX';
+
 
 /** MPN and Brand Needed 
  *
@@ -110,17 +138,17 @@ $item->PostalCode = 'HX62UX';
  */
 $item->ProductListingDetails = new Types\ProductListingDetailsType();
 $item->ProductListingDetails->UPC = 'Does not apply';
-
+$item->ProductListingDetails->EAN = '5051259015555';
 $item->ItemSpecifics = new Types\NameValueListArrayType();
 
 $specific = new Types\NameValueListType();
 $specific->Name = 'Brand';
-$specific->Value[] = 'VisioSound';
+$specific->Value[] = $Brand;
 $item->ItemSpecifics->NameValueList[] = $specific;
 
 $specific = new Types\NameValueListType();
 $specific->Name = 'MPN';
-$specific->Value[] = 'SYT010';
+$specific->Value[] = $MPN;
 $item->ItemSpecifics->NameValueList[] = $specific;
 
 /**
@@ -133,19 +161,22 @@ $item->Currency = 'GBP';
  */
 $item->PictureDetails = new Types\PictureDetailsType();
 $item->PictureDetails->GalleryType = Enums\GalleryTypeCodeType::C_GALLERY;
-$item->PictureDetails->PictureURL = ['http://images.visiosound.co.uk/images/products/1444921546-08732900.jpg'];
+$item->PictureDetails->PictureURL = [$PictureURL1, $PictureURL2];
+
 
 /**
  * List item in the Allocated Category
  */
 $item->PrimaryCategory = new Types\CategoryType();
-$item->PrimaryCategory->CategoryID = '26261';
+$item->PrimaryCategory->CategoryID = $Category;
+
 
 /**
  * Tell buyers what condition the item is in.
  * For the category that we are listing in the value of 1000 is for Brand New.
  */
-$item->ConditionID = 1000;
+ 
+$item->ConditionID = $Condition;
 
 /**
  * Buyers can use one of two payment methods when purchasing the item.
@@ -158,7 +189,7 @@ $item->ConditionID = 1000;
 $item->PaymentMethods = [
     'PayPal'
 ];
-$item->PayPalEmailAddress = 'sales@visiosound.co.uk';
+$item->PayPalEmailAddress = 'example@example.com';
 $item->DispatchTimeMax = 1;
 
 /**
@@ -175,7 +206,7 @@ $item->ShippingDetails->ShippingType = Enums\ShippingTypeCodeType::C_FLAT;
  */
 $shippingService = new Types\ShippingServiceOptionsType();
 $shippingService->ShippingServicePriority = 1;
-$shippingService->ShippingService = 'UK_RoyalMailSecondClassStandard';
+$shippingService->ShippingService = $Shipping1;
 $shippingService->ShippingServiceCost = new Types\AmountType(['value' => 2.00]);
 $shippingService->ShippingServiceAdditionalCost = new Types\AmountType(['value' => 1.00]);
 $item->ShippingDetails->ShippingServiceOptions[] = $shippingService;
@@ -185,7 +216,7 @@ $item->ShippingDetails->ShippingServiceOptions[] = $shippingService;
  */
 $shippingService = new Types\ShippingServiceOptionsType();
 $shippingService->ShippingServicePriority = 2;
-$shippingService->ShippingService = 'UK_OtherCourier24';
+$shippingService->ShippingService = $Shipping2;
 $shippingService->ShippingServiceCost = new Types\AmountType(['value' => 3.00]);
 $shippingService->ShippingServiceAdditionalCost = new Types\AmountType(['value' => 2.00]);
 $item->ShippingDetails->ShippingServiceOptions[] = $shippingService;
@@ -201,8 +232,7 @@ $shippingService->ShippingServiceCost = new Types\AmountType(['value' => 4.00]);
 $shippingService->ShippingServiceAdditionalCost = new Types\AmountType(['value' => 3.00]);
 $shippingService->ShipToLocation = [
 	'AU',
-	'Europe',
-	'GB'];
+	'Europe'];
 $item->ShippingDetails->InternationalShippingServiceOption[] = $shippingService;
 
 /**
@@ -217,8 +247,7 @@ $shippingService->ShippingServiceCost = new Types\AmountType(['value' => 5.00]);
 $shippingService->ShippingServiceAdditionalCost = new Types\AmountType(['value' => 4.00]);
 $shippingService->ShipToLocation = [
     'AU',
-    'Europe',
-    'GB'
+    'Europe'
 ];
 $item->ShippingDetails->InternationalShippingServiceOption[] = $shippingService;
 
@@ -242,13 +271,14 @@ $request->Item = $item;
  */
 $response = $service->addFixedPriceItem($request);
 
+
 /**
  * Output the result of calling the service operation.
  */
 if (isset($response->Errors)) {
     foreach ($response->Errors as $error) {
         printf(
-            "%s: %s\n%s\n\n",
+            "%s: %s\n%s\n\n <br/>",
             $error->SeverityCode === Enums\SeverityCodeType::C_ERROR ? 'Error' : 'Warning',
             $error->ShortMessage,
             $error->LongMessage
@@ -257,8 +287,11 @@ if (isset($response->Errors)) {
 }
 
 if ($response->Ack !== 'Failure') {
+	printf(
+		$title, $SKU, "was listed to the eBay Sandbox/Production with the Item number %s \n"
+	);
     printf(
-        "The item was listed to the eBay Sandbox/Production with the Item number %s\n",
         $response->ItemID
     );
+}
 }
